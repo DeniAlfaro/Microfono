@@ -45,6 +45,8 @@ namespace Microfono
 
             //con que funcion respondemos cuando se llena el buffer
             waveIn.DataAvailable += WaveIn_DataAvailable;
+
+            waveIn.StartRecording();
         }
 
         private void WaveIn_DataAvailable(object sender, WaveInEventArgs e)
