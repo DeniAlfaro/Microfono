@@ -51,7 +51,46 @@ namespace Microfono
 
         private void WaveIn_DataAvailable(object sender, WaveInEventArgs e)
         {
-            throw new NotImplementedException();
+            byte[] buffer = e.Buffer;
+            int bytesGrabados = e.BytesRecorded;
+
+            int numMuestras = bytesGrabados / 2;
+
+            int exponente = 0;
+            int numBits = 0;
+            do
+            {
+                exponente++;
+                numBits = (int)Math.Pow(2, exponente);
+            } while (numBits < numMuestras);
+            exponente -= 1;
+
+            numBits = (int)Math.Pow(2, exponente);
+            Complex[] muestrasComplejas = new Complex[numBits];
+
+            for (int i = 0; i < bytesGrabados; i += 2)
+            {
+                short muestra = (short)(buffer[i + 1] << 8 | buffer[i]);
+                float muestra32bits = (float)muestra / 32768.0f;
+                if (i / 2 < numBits)
+                {
+                    muestrasComplejas[i / 2].X = muestra32bits;
+                }
+            }
+            FastFourierTransform.FFT(true, exponente, muestrasComplejas);
+            float[] valoresAbsolutos = new float[muestrasComplejas.Length];
+
+            for (int i = 0; i < muestrasComplejas.Length; i++)
+            {
+                valoresAbsolutos[i] = (float)Math.Sqrt((muestrasComplejas[i].X + muestrasComplejas[i].X)
+                    + (muestrasComplejas[i].Y * muestrasComplejas[i].Y));
+
+            }
+            int indiceValorMaximo = valoresAbsolutos.ToList().IndexOf(valoresAbsolutos.Max());
+            float frecuenciaFundamental = (float)(indiceValorMaximo * formato.SampleRate) / (float)(valoresAbsolutos.Length);
+
+            lblHertz.Text = frecuenciaFundamental.ToString("N") + "H";
         }
+    }
     }
 }
