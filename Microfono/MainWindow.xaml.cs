@@ -91,6 +91,10 @@ namespace Microfono
 
             lblHertz.Text = frecuenciaFundamental.ToString("N") + "H";
         }
-    }
+
+        private void BtnDetener_Click(object sender, RoutedEventArgs e)
+        {
+            wavein.StartRecording();
+        }
     }
 }
